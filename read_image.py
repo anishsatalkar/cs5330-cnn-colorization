@@ -50,8 +50,10 @@ def plot_predicted_image(original_image, predicted_image):
     fig, ax = plt.subplots(1, 2)
     ax[0].imshow(original_image)
     ax[0].set_title('Original')
+    ax[0].axis('off')
     ax[1].imshow(predicted_image)
     ax[1].set_title('Predicted')
+    ax[1].axis('off')
     plt.show()
 
 
