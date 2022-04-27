@@ -13,30 +13,36 @@ def convertToLAB(image):
 
 
 def plot_LAB(image, lab_image):
+    figure = plt.figure(figsize=(1, 4))
+
     L, A, B = cv2.split(lab_image)
     # plot the LAB image
-    plt.subplot(1, 4, 1)
+    figure.add_subplot(1, 4, 1)
     plt.imshow(image)
     plt.title('Original')
     plt.axis('off')
-    plt.subplot(1, 4, 2)
+    figure.add_subplot(1, 4, 2)
     plt.imshow(L, cmap='gray')
-    plt.title('L')
+    plt.title('l')
     plt.axis('off')
-    plt.subplot(1, 4, 3)
+    figure.add_subplot(1, 4, 3)
     plt.imshow(A, cmap='RdYlGn')
-    plt.title('A')
+    plt.title('a')
     plt.axis('off')
-    plt.subplot(1, 4, 4)
+    figure.add_subplot(1, 4, 4)
     plt.imshow(B, cmap='YlGnBu')
-    plt.title('B')
+    plt.title('b')
     plt.axis('off')
-    plt.show()
 
+    return figure
+
+
+def save_images(lab_image):
     # save the images
-    cv2.imwrite('./L.png', L)
-    cv2.imwrite('./A.png', A)
-    cv2.imwrite('./B.png', B)
+    L, A, B = cv2.split(lab_image)
+    cv2.imwrite('.images/L.png', L)
+    cv2.imwrite('.images/A.png', A)
+    cv2.imwrite('.images/B.png', B)
 
 
 def combine(L, A, B):
@@ -75,7 +81,8 @@ def main(argv):
     # plot_LAB(image, lab_image, merged_image)
     # plot the original and predicted images
     plot_predicted_image(image, merged_image)
-
+    # save the images
+    save_images(lab_image)
     return 0
 
 
