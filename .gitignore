@@ -79,3 +79,4 @@ fabric.properties
 *.jpg
 *.mp4
 *.avi
+*.pyc

@@ -9,6 +9,8 @@ from PIL import Image
 import read_image
 from torchvision.transforms import RandomResizedCrop
 
+image_size = 256
+
 
 def main(argv):
     if len(argv) != 2:
@@ -19,13 +21,16 @@ def main(argv):
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     writer = cv2.VideoWriter(
-        "./videos/output.avi", cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10, (int(width*256/height), 256))
+        "./videos/output.avi", cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (image_size, image_size))
     # display the video
     while True:
         success, frame = cap.read()
         if success:
+            # add a border to the frame
+            frame = cv2.copyMakeBorder(
+                frame, int((width-height)/2), int((width-height)/2), 0, 0, cv2.BORDER_CONSTANT, None, value=0)
             # resize to 128x128
-            frame = imutils.resize(frame, height=256)
+            frame = cv2.resize(frame, (image_size, image_size))
             # convert to LAB
             lab_image = read_image.convertToLAB(frame)
             L, A, B = cv2.split(lab_image)
