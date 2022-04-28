@@ -64,7 +64,7 @@ class Trainer(object):
         end_time = time.time()
         is_image_saved = False
 
-        path_to_save = {'grayscale': 'outputs/gray/', 'colorized': 'outputs/color/'}
+        path_to_save = {'grayscale': 'outputs/gray/', 'color': 'outputs/color/'}
 
         use_gpu = False
         if torch.cuda.is_available():
