@@ -1,17 +1,14 @@
 import torch
-import torchvision
-from PIL import Image
 from torch import nn
-from torchvision import datasets, transforms
-
-from model import GrayscaleToColorModel
+from torchvision import transforms
 
 from grayscalefolder import GrayscaleImageFolder
+from model import GrayscaleToColorModel, Trainer
 
 
 def main():
     model = GrayscaleToColorModel()
-    loss_function = nn.MSELoss()
+    criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
     train_transforms = transforms.Compose([transforms.RandomResizedCrop(224), transforms.RandomHorizontalFlip()])
@@ -22,12 +19,19 @@ def main():
     validation_imagefolder = GrayscaleImageFolder('/Users/anishsatalkar/Downloads/images/val', validation_transforms)
     validation_loader = torch.utils.data.DataLoader(validation_imagefolder, batch_size=64, shuffle=False)
 
+    save_images = True
+    max_losses = 1e10
+    epochs = 5
 
+    for epoch in range(epochs):
+        Trainer.train(train_loader, model, criterion, optimizer, epoch)
 
+        with torch.no_grad():
+            losses = Trainer.validate(validation_loader, model, criterion, save_images, epoch)
 
-
-
-
+        if losses < max_losses:
+            max_losses = losses
+            torch.save(model.state_dict(), f'checkpoints/model-epoch-{epoch + 1}-losses-{losses}')
 
     # image = Image.open(image_file)
     #

@@ -1,5 +1,9 @@
+import time
+
 import torch.nn as nn
 from torchvision import models
+
+from helper import State, ConvertToRGB
 
 
 class GrayscaleToColorModel(nn.Module):
@@ -43,8 +47,78 @@ class GrayscaleToColorModel(nn.Module):
             nn.Upsample(scale_factor=2)
         )
 
-        def forward(input_frame):
-            features_from_resnet_layers = self.resnet_layers(input_frame)
-            a_b_channel_output = self.upsample_layers(features_from_resnet_layers)
-            return a_b_channel_output
+    def forward(self, input_frame):
+        features_from_resnet_layers = self.resnet_layers(input_frame)
+        a_b_channel_output = self.upsample_layers(features_from_resnet_layers)
+        return a_b_channel_output
+
+
+class Trainer(object):
+    @staticmethod
+    def validate(validate_loader, model, criterion, save_imgs, epoch):
+        model.eval()
+
+        batch_time, data_time, losses = State(), State(), State()
+
+        end_time = time.time()
+        is_image_saved = False
+
+        path_to_save = {'grayscale': 'outputs/gray/', 'colorized': 'outputs/color/'}
+
+        for idx, (gray, ab_img, target) in enumerate(validate_loader):
+            data_time.update(time.time() - end_time)
+
+            predicted_ab_img = model(gray)
+            loss = criterion(predicted_ab_img, ab_img)
+            losses.update(loss.item(), gray.size(0))
+
+            if save_imgs and not is_image_saved:
+                is_image_saved = True
+                for jdx in range(min(len(predicted_ab_img), 10)):
+                    save_name = f"img-{idx * validate_loader.batch_size + j}-epoch-{epoch}.jpg"
+                    ConvertToRGB.convert_to_rgb(gray[jdx].cpu(), ab_img=predicted_ab_img[jdx].detach().cpu(),
+                                                path_to_save=path_to_save, save_name=save_name)
+
+            batch_time.update(time.time() - end_time)
+            end_time = time.time()
+
+            if idx % 25 == 0:
+                print(f'Validation: [{idx}/{len(validate_loader)}]\t'
+                      f'Time {batch_time.val:.3f} ({batch_time.average:.3f})\t'
+                      f'Loss {losses.val:.4f} ({losses.average:.4f})\t')
+
+        print("Done with validation.")
+        return losses.average
+
+    @staticmethod
+    def train(train_loader, model, criterion, optimizer, epoch):
+        print(f"Training epoch {epoch}")
+
+        model.train()
+
+        batch_time, data_time, losses = State(), State(), State()
+
+        end_time = time.time()
+
+        for idx, (gray, ab_img, target) in enumerate(train_loader):
+            data_time.update(time.time(), end_time)
+
+            predicted_ab_img = model(gray)
+            loss = criterion(predicted_ab_img, ab_img)
+            losses.update(loss.item(), gray.size(0))
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            batch_time.update(time.time(), end_time)
+            end_time = time.time()
+
+            # if idx % 25 == 0:
+            print(f'Epoch: [{epoch}][{idx}/{len(train_loader)}]\t'
+                  f'Time {batch_time.val:.3f} ({batch_time.average:.3f})\t'
+                  f'Data {data_time.val:.3f} ({data_time.average:.3f})\t'
+                  f'Loss {losses.val:.4f} ({losses.average:.4f})\t')
+
+        print(f'Trained epoch {epoch}')
 
