@@ -10,10 +10,10 @@ from model import GrayscaleToColorModel, Trainer
 
 def main():
     # a = torch.cuda.FloatTensor()
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(device)
-    print(torch.cuda.is_available())
-    print(torch.version.cuda)
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # print(device)
+    # print(torch.cuda.is_available())
+    # print(torch.version.cuda)
 
     use_gpu = torch.cuda.is_available()
     config = ConfigReader.read()
@@ -42,7 +42,7 @@ def main():
 
     save_images = True
     max_losses = 1e10
-    epochs = 1
+    epochs = 10
 
     for epoch in range(epochs):
         start = time.time()
