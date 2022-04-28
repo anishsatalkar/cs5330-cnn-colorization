@@ -1,4 +1,4 @@
 {
-  "train_val_split_dir": "/Users/anishsatalkar/Downloads/images",
-  "training_data_directory": "/Users/anishsatalkar/Downloads/testSetPlaces205_resize"
+  "train_val_split_dir": "D:\\Documents\\Northeastern\\Courses\\PRCV-5330\\Projects\\final_project\\cs5330-cnn-colorization\\images",
+  "training_data_directory": "D:\\Documents\\Northeastern\\Courses\\PRCV-5330\\Projects\\final_project\\MIT_images"
 }

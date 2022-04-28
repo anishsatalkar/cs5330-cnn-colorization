@@ -40,6 +40,8 @@ def main(argv):
             # save the frames
             writer.write(merged_image)
 
+            # TODO: remove black stripes before displaying and saving video
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         else:
