@@ -1,5 +1,6 @@
 import time
 
+import torch.cuda
 import torch.nn as nn
 from torchvision import models
 
@@ -65,8 +66,15 @@ class Trainer(object):
 
         path_to_save = {'grayscale': 'outputs/gray/', 'colorized': 'outputs/color/'}
 
+        use_gpu = False
+        if torch.cuda.is_available():
+            use_gpu = True
+
         for idx, (gray, ab_img, target) in enumerate(validate_loader):
             data_time.update(time.time() - end_time)
+
+            if use_gpu:
+                gray, ab_img, target = gray.cuda(), ab_img.cuda(), target.cuda()
 
             predicted_ab_img = model(gray)
             loss = criterion(predicted_ab_img, ab_img)
@@ -75,7 +83,7 @@ class Trainer(object):
             if save_imgs and not is_image_saved:
                 is_image_saved = True
                 for jdx in range(min(len(predicted_ab_img), 10)):
-                    save_name = f"img-{idx * validate_loader.batch_size + j}-epoch-{epoch}.jpg"
+                    save_name = f"img-{idx * validate_loader.batch_size + jdx}-epoch-{epoch}.jpg"
                     ConvertToRGB.convert_to_rgb(gray[jdx].cpu(), ab_img=predicted_ab_img[jdx].detach().cpu(),
                                                 path_to_save=path_to_save, save_name=save_name)
 
@@ -100,8 +108,15 @@ class Trainer(object):
 
         end_time = time.time()
 
+        use_gpu = False
+        if torch.cuda.is_available():
+            use_gpu = True
+
         for idx, (gray, ab_img, target) in enumerate(train_loader):
             data_time.update(time.time(), end_time)
+
+            if use_gpu:
+                gray, ab_img, target = gray.cuda(), ab_img.cuda(), target.cuda()
 
             predicted_ab_img = model(gray)
             loss = criterion(predicted_ab_img, ab_img)
@@ -121,4 +136,3 @@ class Trainer(object):
                   f'Loss {losses.val:.4f} ({losses.average:.4f})\t')
 
         print(f'Trained epoch {epoch}')
-

@@ -2,26 +2,34 @@ import torch
 from torch import nn
 from torchvision import transforms
 
+from config_reader import ConfigReader
 from grayscalefolder import GrayscaleImageFolder
 from model import GrayscaleToColorModel, Trainer
 
 
 def main():
+    use_gpu = torch.cuda.is_available()
+    config = ConfigReader.read()
+
     model = GrayscaleToColorModel()
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
+    if use_gpu:
+        criterion = criterion.cuda()
+        model = model.cuda()
+
     train_transforms = transforms.Compose([transforms.RandomResizedCrop(224), transforms.RandomHorizontalFlip()])
-    train_imagefolder = GrayscaleImageFolder('/Users/anishsatalkar/Downloads/images/train', train_transforms)
+    train_imagefolder = GrayscaleImageFolder(f'{config["train_val_split_dir"]}/train', train_transforms)
     train_loader = torch.utils.data.DataLoader(train_imagefolder, batch_size=64, shuffle=True)
 
     validation_transforms = transforms.Compose([transforms.Resize(256), transforms.CenterCrop(224)])
-    validation_imagefolder = GrayscaleImageFolder('/Users/anishsatalkar/Downloads/images/val', validation_transforms)
+    validation_imagefolder = GrayscaleImageFolder(f'{config["train_val_split_dir"]}/val', validation_transforms)
     validation_loader = torch.utils.data.DataLoader(validation_imagefolder, batch_size=64, shuffle=False)
 
     save_images = True
     max_losses = 1e10
-    epochs = 5
+    epochs = 1
 
     for epoch in range(epochs):
         Trainer.train(train_loader, model, criterion, optimizer, epoch)
