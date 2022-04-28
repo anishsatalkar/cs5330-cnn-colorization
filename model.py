@@ -15,8 +15,7 @@ class GrayscaleToColorModel(nn.Module):
         resnet = models.resnet18(num_classes=365)
 
         # Change the weight of the first layer so that it accepts single channel grayscale input.
-        resnet.conv1.weight = nn.Parameter(
-            resnet.conv1.weight.sum(dim=1).unsqueeze(1))
+        resnet.conv1.weight = nn.Parameter(resnet.conv1.weight.sum(dim=1).unsqueeze(1))
 
         # TODO: Check resnet.children(), does increasing the layers improve the accuracy?
         # Use only the first 6 layers of ResNet18
@@ -65,8 +64,7 @@ class Trainer(object):
         end_time = time.time()
         is_image_saved = False
 
-        path_to_save = {'grayscale': 'outputs/gray/',
-                        'colorized': 'outputs/color/'}
+        path_to_save = {'grayscale': 'outputs/gray/', 'color': 'outputs/color/'}
 
         use_gpu = False
         if torch.cuda.is_available():
@@ -92,7 +90,7 @@ class Trainer(object):
             batch_time.update(time.time() - end_time)
             end_time = time.time()
 
-            if idx % 50 == 0:
+            if idx % 25 == 0:
                 print(f'Validation: [{idx}/{len(validate_loader)}]\t'
                       f'Time {batch_time.val:.3f} ({batch_time.average:.3f})\t'
                       f'Loss {losses.val:.4f} ({losses.average:.4f})\t')
@@ -131,10 +129,10 @@ class Trainer(object):
             batch_time.update(time.time(), end_time)
             end_time = time.time()
 
-            if idx % 50 == 0:
-                print(f'Epoch: [{epoch}][{idx}/{len(train_loader)}]\t'
-                      f'Time {batch_time.val:.3f} ({batch_time.average:.3f})\t'
-                      f'Data {data_time.val:.3f} ({data_time.average:.3f})\t'
-                      f'Loss {losses.val:.4f} ({losses.average:.4f})\t')
+            # if idx % 25 == 0:
+            print(f'Epoch: [{epoch}][{idx}/{len(train_loader)}]\t'
+                  f'Time {batch_time.val:.3f} ({batch_time.average:.3f})\t'
+                  f'Data {data_time.val:.3f} ({data_time.average:.3f})\t'
+                  f'Loss {losses.val:.4f} ({losses.average:.4f})\t')
 
         print(f'Trained epoch {epoch}')
