@@ -7,7 +7,7 @@ class GrayscaleToColorModel(nn.Module):
         super(GrayscaleToColorModel, self).__init__()
 
         # TODO: add num_classes argument
-        resnet = models.resnet18()
+        resnet = models.resnet18(num_classes=365)
 
         # Change the weight of the first layer so that it accepts single channel grayscale input.
         resnet.conv1.weight = nn.Parameter(resnet.conv1.weight.sum(dim=1).unsqueeze(1))
