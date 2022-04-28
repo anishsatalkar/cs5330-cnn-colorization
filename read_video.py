@@ -1,13 +1,8 @@
 import sys
-import io
+
 import cv2
-from cv2 import cvtColor
-import imutils
-import matplotlib.pyplot as plt
-import numpy as np
-from PIL import Image
+
 import read_image
-from torchvision.transforms import RandomResizedCrop
 
 image_size = 256
 

@@ -80,3 +80,7 @@ fabric.properties
 *.mp4
 *.avi
 *.pyc
+
+
+# tar files
+*.tar

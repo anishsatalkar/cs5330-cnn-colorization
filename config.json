@@ -1,0 +1,4 @@
+{
+  "train_val_split_dir": "/Users/anishsatalkar/Downloads/images",
+  "training_data_directory": "/Users/anishsatalkar/Downloads/testSetPlaces205_resize"
+}
