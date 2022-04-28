@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 from skimage.color import lab2rgb
 
@@ -25,7 +26,8 @@ class ConvertToRGB(object):
         color_img = color_img.transpose((1, 2, 0))
         color_img[:, :, 0:1] = color_img[:, :, 0:1] * 100
         color_img[:, :, 1:3] = color_img[:, :, 1:3] * 255 - 128
-        color_img = lab2rgb(color_img.squeeze().numpy())
+        color_img = lab2rgb(color_img.astype(np.float64))
+        # color_img = lab2rgb(color_img.squeeze().numpy())
         gray = gray.squeeze().numpy()
         if path_to_save is not None and save_name is not None:
             plt.imsave(arr=gray, fname=f"{path_to_save['grayscale']}{save_name}", cmap='gray')
