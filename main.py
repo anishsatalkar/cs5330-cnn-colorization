@@ -42,7 +42,7 @@ def main():
 
     save_images = True
     max_losses = 1e10
-    epochs = 10
+    epochs = 100
 
     for epoch in range(epochs):
         start = time.time()
