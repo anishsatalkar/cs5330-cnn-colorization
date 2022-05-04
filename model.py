@@ -55,6 +55,16 @@ class GrayscaleToColorModel(nn.Module):
 class Trainer(object):
     @staticmethod
     def validate_model(validate_loader, model, criterion, save_imgs, path_to_save, epoch):
+        """
+        Validates the current state of the model.
+        :param validate_loader: The loader object that specifies parameters like batch size, shuffle behavior, etc.
+        :param cnn_model: The CNN model.
+        :param loss_criterion: The current_loss function.
+        :param should_save: Flag that specifies whether while validation should the images be saved or not.
+        :param save_path: Path where the predicted image should be saved.
+        :param epoch: Current value of the training epoch.
+        :return: Average current_loss.
+        """
         model.eval()
 
         batch_time, data_time, losses = State(), State(), State()
@@ -106,6 +116,14 @@ class Trainer(object):
 
     @staticmethod
     def train_model(train_loader, model, criterion, optimizer, epoch):
+        """
+        Trains the model.
+        :param train_loader: Train loader object that specifies parameters like batch size, shuffle behavior, etc.
+        :param model: The CNN model.
+        :param criterion: The loss function.
+        :param optimizer: The CNN optimizer.
+        :param epoch: The current epoch.
+        """
         print(f"Training epoch {epoch}")
 
         model.train()
