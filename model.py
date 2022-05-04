@@ -57,16 +57,13 @@ class GrayscaleToColorModel(nn.Module):
 
 class Trainer(object):
     @staticmethod
-    def validate(validate_loader, model, criterion, save_imgs, epoch):
+    def validate(validate_loader, model, criterion, save_imgs, path_to_save, epoch):
         model.eval()
 
         batch_time, data_time, losses = State(), State(), State()
 
         end_time = time.time()
         is_image_saved = False
-
-        path_to_save = {'grayscale': 'outputs/gray/',
-                        'color': 'outputs/color/'}
 
         use_gpu = False
         if torch.cuda.is_available():
@@ -78,16 +75,26 @@ class Trainer(object):
             if use_gpu:
                 gray, ab_img, target = gray.cuda(), ab_img.cuda(), target.cuda()
 
+            print(f"Predicting {idx} image")
             predicted_ab_img = model(gray)
             loss = criterion(predicted_ab_img, ab_img)
             losses.update(loss.item(), gray.size(0))
 
-            if save_imgs and not is_image_saved:
-                is_image_saved = True
+            if epoch=="":
                 for jdx in range(min(len(predicted_ab_img), 10)):
+                    print(f"Saving {idx} image")
                     save_name = f"img-{idx * validate_loader.batch_size + jdx}-epoch-{epoch}.jpg"
                     ConvertToRGB.convert_to_rgb(gray[jdx].cpu(), ab_img=predicted_ab_img[jdx].detach().cpu(),
                                                 path_to_save=path_to_save, save_name=save_name)
+            else:
+                # if save_imgs:
+                if save_imgs and not is_image_saved:
+                    is_image_saved = True
+                    for jdx in range(min(len(predicted_ab_img), 10)):
+                        print(f"Saving {idx} image")
+                        save_name = f"img-{idx * validate_loader.batch_size + jdx}-epoch-{epoch}.jpg"
+                        ConvertToRGB.convert_to_rgb(gray[jdx].cpu(), ab_img=predicted_ab_img[jdx].detach().cpu(),
+                                                    path_to_save=path_to_save, save_name=save_name)
 
             batch_time.update(time.time() - end_time)
             end_time = time.time()
