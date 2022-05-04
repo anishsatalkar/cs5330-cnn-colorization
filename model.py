@@ -67,7 +67,7 @@ class Trainer(object):
         """
         model.eval()
 
-        batch_time, data_time, losses = State(), State(), State()
+        batch_time, data_time, cumulative_losses = State(), State(), State()
 
         end_time = time.time()
         is_image_saved = False
@@ -76,22 +76,22 @@ class Trainer(object):
         if torch.cuda.is_available():
             use_gpu = True
 
-        for idx, (gray, ab_img, target) in enumerate(validate_loader):
+        for idx, (gray_image, ab_image, target) in enumerate(validate_loader):
             data_time.update_state(time.time() - end_time)
 
             if use_gpu:
-                gray, ab_img, target = gray.cuda(), ab_img.cuda(), target.cuda()
+                gray_image, ab_image, target = gray_image.cuda(), ab_image.cuda(), target.cuda()
 
             print(f"Predicting {idx} image")
-            predicted_ab_img = model(gray)
-            loss = criterion(predicted_ab_img, ab_img)
-            losses.update_state(loss.item(), gray.size(0))
+            predicted_ab_img = model(gray_image)
+            loss = criterion(predicted_ab_img, ab_image)
+            cumulative_losses.update_state(loss.item(), gray_image.size(0))
 
             if epoch == "":
                 for jdx in range(min(len(predicted_ab_img), 10)):
                     print(f"Saving {idx} image")
                     save_name = f"img-{idx * validate_loader.batch_size + jdx}-epoch-{epoch}.jpg"
-                    ConvertToRGB.convert_to_rgb(gray[jdx].cpu(), ab_img=predicted_ab_img[jdx].detach().cpu(),
+                    ConvertToRGB.convert_to_rgb(gray_image[jdx].cpu(), ab_img=predicted_ab_img[jdx].detach().cpu(),
                                                 path_to_save=path_to_save, save_name=save_name)
             else:
                 # if save_imgs:
@@ -100,7 +100,7 @@ class Trainer(object):
                     for jdx in range(min(len(predicted_ab_img), 10)):
                         print(f"Saving {idx} image")
                         save_name = f"img-{idx * validate_loader.batch_size + jdx}-epoch-{epoch}.jpg"
-                        ConvertToRGB.convert_to_rgb(gray[jdx].cpu(), ab_img=predicted_ab_img[jdx].detach().cpu(),
+                        ConvertToRGB.convert_to_rgb(gray_image[jdx].cpu(), ab_img=predicted_ab_img[jdx].detach().cpu(),
                                                     path_to_save=path_to_save, save_name=save_name)
 
             batch_time.update_state(time.time() - end_time)
@@ -109,26 +109,26 @@ class Trainer(object):
             if idx % 50 == 0:
                 print(f'Validation: [{idx}/{len(validate_loader)}]\t'
                       f'Time {batch_time.value:.3f} ({batch_time.average:.3f})\t'
-                      f'Loss {losses.value:.4f} ({losses.average:.4f})\t')
+                      f'Loss {cumulative_losses.value:.4f} ({cumulative_losses.average:.4f})\t')
 
         print("Done with validation.")
-        return losses.average
+        return cumulative_losses.average
 
     @staticmethod
-    def train_model(train_loader, model, criterion, optimizer, epoch):
+    def train_model(train_loader, cnn_model, cnn_criterion, optimizer, epoch):
         """
         Trains the model.
         :param train_loader: Train loader object that specifies parameters like batch size, shuffle behavior, etc.
-        :param model: The CNN model.
-        :param criterion: The loss function.
+        :param cnn_model: The CNN model.
+        :param cnn_criterion: The current_loss function.
         :param optimizer: The CNN optimizer.
         :param epoch: The current epoch.
         """
         print(f"Training epoch {epoch}")
 
-        model.train()
+        cnn_model.train()
 
-        batch_time, data_time, losses = State(), State(), State()
+        batch_time, data_time, cumulative_losses = State(), State(), State()
 
         end_time = time.time()
 
@@ -142,12 +142,12 @@ class Trainer(object):
             if use_gpu:
                 gray, ab_img, target = gray.cuda(), ab_img.cuda(), target.cuda()
 
-            predicted_ab_img = model(gray)
-            loss = criterion(predicted_ab_img, ab_img)
-            losses.update_state(loss.item(), gray.size(0))
+            predicted_ab_img = cnn_model(gray)
+            current_loss = cnn_criterion(predicted_ab_img, ab_img)
+            cumulative_losses.update_state(current_loss.item(), gray.size(0))
 
             optimizer.zero_grad()
-            loss.backward()
+            current_loss.backward()
             optimizer.step()
 
             batch_time.update_state(time.time(), end_time)
@@ -157,6 +157,6 @@ class Trainer(object):
                 print(f'Epoch: [{epoch}][{idx}/{len(train_loader)}]\t'
                       f'Time {batch_time.value:.3f} ({batch_time.average:.3f})\t'
                       f'Data {data_time.value:.3f} ({data_time.average:.3f})\t'
-                      f'Loss {losses.value:.4f} ({losses.average:.4f})\t')
+                      f'Loss {cumulative_losses.value:.4f} ({cumulative_losses.average:.4f})\t')
 
         print(f'Trained epoch {epoch}')
