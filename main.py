@@ -1,3 +1,4 @@
+# Imports.
 import torch
 from torch import nn
 from torchvision import transforms
@@ -9,6 +10,9 @@ from model import GrayscaleToColorModel, Trainer
 
 
 def main():
+    """
+    Loads the training and validation data and trains the model.
+    """
     # a = torch.cuda.FloatTensor()
     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # print(device)
@@ -42,22 +46,26 @@ def main():
 
     save_images = True
     max_losses = 1e10
-    epochs = 10
+    epochs = 5
     path_to_save = {'grayscale': 'outputs/gray/',
                     'color': 'outputs/color/'}
-    for epoch in range(epochs):
-        start = time.time()
-        Trainer.train(train_loader, model, criterion, optimizer, epoch)
-        end = time.time()
-        print(f'Epoch {epoch + 1} took {end - start} seconds')
-        with torch.no_grad():
-            losses = Trainer.validate(
-                validation_loader, model, criterion, save_images, path_to_save, epoch)
+    lr = 0.01
+    for lr_count in range(3):
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+        lr += 0.05
+        for epoch in range(epochs):
+            start = time.time()
+            Trainer.train_model(train_loader, model, criterion, optimizer, epoch)
+            end = time.time()
+            print(f'Epoch {epoch + 1} took {end - start} seconds')
+            with torch.no_grad():
+                losses = Trainer.validate_model(
+                    validation_loader, model, criterion, save_images, path_to_save, epoch)
 
-        if losses < max_losses:
-            max_losses = losses
-            torch.save(model.state_dict(),
-                       f'checkpoints/model-epoch-{epoch + 1}-losses-{losses}')
+            if losses < max_losses:
+                max_losses = losses
+                torch.save(model.state_dict(),
+                           f'ckpt/model-epoch-{epoch + 1}-losses-{losses}')
 
     # image = Image.open(image_file)
     #

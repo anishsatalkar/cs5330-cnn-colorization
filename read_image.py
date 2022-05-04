@@ -1,3 +1,4 @@
+# Imports
 import sys
 
 import cv2
@@ -8,11 +9,22 @@ from torchvision.transforms import RandomResizedCrop
 
 
 def convertToLAB(image):
+    """
+    Converts a given image from BGR to LAB.
+    :param image: Input BGR image.
+    :return: Converted LAB image.
+    """
     # split the image into LAB color space
     return cv2.cvtColor(np.array(image), cv2.COLOR_BGR2LAB)
 
 
 def plot_LAB(image, lab_image):
+    """
+    Plots the original and LAB image.
+    :param image: Original image.
+    :param lab_image: LAB image.
+    :return: Figure that has these plots.
+    """
     figure = plt.figure(figsize=(1, 4))
 
     L, A, B = cv2.split(lab_image)
@@ -38,6 +50,10 @@ def plot_LAB(image, lab_image):
 
 
 def save_images(lab_image):
+    """
+    Saves the given LAB image. Save location is './images'
+    :param lab_image: Given LAB image.
+    """
     # save the images
     L, A, B = cv2.split(lab_image)
     cv2.imwrite('.images/L.png', L)
@@ -46,6 +62,13 @@ def save_images(lab_image):
 
 
 def combine(L, A, B):
+    """
+    Combines L, A and B components of an image into a single image.
+    :param L: Lightness component.
+    :param A: A component of the image.
+    :param B: B component of the image.
+    :return: Combined LAB image.
+    """
     # combine the LAB images
     lab_image = cv2.merge((L, A, B))
     # convert back to RGB
@@ -53,6 +76,11 @@ def combine(L, A, B):
 
 
 def plot_predicted_image(original_image, predicted_image):
+    """
+    Plots the original and predicted image.
+    :param original_image: Original image data.
+    :param predicted_image: Predicted image data.
+    """
     fig, ax = plt.subplots(1, 2)
     ax[0].imshow(original_image)
     ax[0].set_title('Original')

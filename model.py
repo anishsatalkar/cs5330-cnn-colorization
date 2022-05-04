@@ -57,10 +57,20 @@ class GrayscaleToColorModel(nn.Module):
 
 class Trainer(object):
     @staticmethod
-    def validate(validate_loader, model, criterion, save_imgs, path_to_save, epoch):
-        model.eval()
+    def validate_model(validate_loader, cnn_model, loss_criterion, should_save, save_path, epoch):
+        """
+        Validates the current state of the model.
+        :param validate_loader: The loader object that specifies parameters like batch size, shuffle behavior, etc.
+        :param cnn_model: The CNN model.
+        :param loss_criterion: The current_loss function.
+        :param should_save: Flag that specifies whether while validation should the images be saved or not.
+        :param save_path: Path where the predicted image should be saved.
+        :param epoch: Current value of the training epoch.
+        :return: Average current_loss.
+        """
+        cnn_model.eval()
 
-        batch_time, data_time, losses = State(), State(), State()
+        batch_time, data_time, accumulated_losses = State(), State(), State()
 
         end_time = time.time()
         is_image_saved = False
@@ -69,51 +79,59 @@ class Trainer(object):
         if torch.cuda.is_available():
             use_gpu = True
 
-        for idx, (gray, ab_img, target) in enumerate(validate_loader):
-            data_time.update(time.time() - end_time)
+        for idx, (gray_image, ab_image, target_image) in enumerate(validate_loader):
+            data_time.update_state(time.time() - end_time)
 
             if use_gpu:
-                gray, ab_img, target = gray.cuda(), ab_img.cuda(), target.cuda()
+                gray_image, ab_image, target_image = gray_image.cuda(), ab_image.cuda(), target_image.cuda()
 
             print(f"Predicting {idx} image")
-            predicted_ab_img = model(gray)
-            loss = criterion(predicted_ab_img, ab_img)
-            losses.update(loss.item(), gray.size(0))
+            predicted_ab_image = cnn_model(gray_image)
+            current_loss = loss_criterion(predicted_ab_image, ab_image)
+            accumulated_losses.update_state(current_loss.item(), gray_image.size(0))
 
             if epoch=="":
-                for jdx in range(min(len(predicted_ab_img), 10)):
+                for jdx in range(min(len(predicted_ab_image), 10)):
                     print(f"Saving {idx} image")
                     save_name = f"img-{idx * validate_loader.batch_size + jdx}-epoch-{epoch}.jpg"
-                    ConvertToRGB.convert_to_rgb(gray[jdx].cpu(), ab_img=predicted_ab_img[jdx].detach().cpu(),
-                                                path_to_save=path_to_save, save_name=save_name)
+                    ConvertToRGB.convert_to_rgb(gray_image[jdx].cpu(), ab_img=predicted_ab_image[jdx].detach().cpu(),
+                                                path_to_save=save_path, save_name=save_name)
             else:
                 # if save_imgs:
-                if save_imgs and not is_image_saved:
+                if should_save and not is_image_saved:
                     is_image_saved = True
-                    for jdx in range(min(len(predicted_ab_img), 10)):
+                    for jdx in range(min(len(predicted_ab_image), 10)):
                         print(f"Saving {idx} image")
                         save_name = f"img-{idx * validate_loader.batch_size + jdx}-epoch-{epoch}.jpg"
-                        ConvertToRGB.convert_to_rgb(gray[jdx].cpu(), ab_img=predicted_ab_img[jdx].detach().cpu(),
-                                                    path_to_save=path_to_save, save_name=save_name)
+                        ConvertToRGB.convert_to_rgb(gray_image[jdx].cpu(), ab_img=predicted_ab_image[jdx].detach().cpu(),
+                                                    path_to_save=save_path, save_name=save_name)
 
-            batch_time.update(time.time() - end_time)
+            batch_time.update_state(time.time() - end_time)
             end_time = time.time()
 
             if idx % 50 == 0:
                 print(f'Validation: [{idx}/{len(validate_loader)}]\t'
-                      f'Time {batch_time.val:.3f} ({batch_time.average:.3f})\t'
-                      f'Loss {losses.val:.4f} ({losses.average:.4f})\t')
+                      f'Time {batch_time.value:.3f} ({batch_time.average:.3f})\t'
+                      f'Loss {accumulated_losses.value:.4f} ({accumulated_losses.average:.4f})\t')
 
         print("Done with validation.")
-        return losses.average
+        return accumulated_losses.average
 
     @staticmethod
-    def train(train_loader, model, criterion, optimizer, epoch):
+    def train_model(train_loader, model, criterion, cnn_optimizer, epoch):
+        """
+        Trains the model.
+        :param train_loader: Train loader object that specifies parameters like batch size, shuffle behavior, etc.
+        :param model: The CNN model.
+        :param criterion: The loss function.
+        :param cnn_optimizer: The CNN optimizer.
+        :param epoch: The current epoch.
+        """
         print(f"Training epoch {epoch}")
 
-        model.train()
+        model.train_model()
 
-        batch_time, data_time, losses = State(), State(), State()
+        batch_time, data_time, accumulated_losses = State(), State(), State()
 
         end_time = time.time()
 
@@ -121,27 +139,27 @@ class Trainer(object):
         if torch.cuda.is_available():
             use_gpu = True
 
-        for idx, (gray, ab_img, target) in enumerate(train_loader):
-            data_time.update(time.time(), end_time)
+        for idx, (gray_image, ab_image, target) in enumerate(train_loader):
+            data_time.update_state(time.time(), end_time)
 
             if use_gpu:
-                gray, ab_img, target = gray.cuda(), ab_img.cuda(), target.cuda()
+                gray_image, ab_image, target = gray_image.cuda(), ab_image.cuda(), target.cuda()
 
-            predicted_ab_img = model(gray)
-            loss = criterion(predicted_ab_img, ab_img)
-            losses.update(loss.item(), gray.size(0))
+            predicted_ab_image = model(gray_image)
+            current_loss = criterion(predicted_ab_image, ab_image)
+            accumulated_losses.update_state(current_loss.item(), gray_image.size(0))
 
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+            cnn_optimizer.zero_grad()
+            current_loss.backward()
+            cnn_optimizer.step()
 
-            batch_time.update(time.time(), end_time)
+            batch_time.update_state(time.time(), end_time)
             end_time = time.time()
 
             if idx % 50 == 0:
                 print(f'Epoch: [{epoch}][{idx}/{len(train_loader)}]\t'
-                      f'Time {batch_time.val:.3f} ({batch_time.average:.3f})\t'
-                      f'Data {data_time.val:.3f} ({data_time.average:.3f})\t'
-                      f'Loss {losses.val:.4f} ({losses.average:.4f})\t')
+                      f'Time {batch_time.value:.3f} ({batch_time.average:.3f})\t'
+                      f'Data {data_time.value:.3f} ({data_time.average:.3f})\t'
+                      f'Loss {accumulated_losses.value:.4f} ({accumulated_losses.average:.4f})\t')
 
         print(f'Trained epoch {epoch}')

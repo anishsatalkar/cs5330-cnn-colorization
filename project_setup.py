@@ -4,6 +4,9 @@ from config_reader import ConfigReader
 
 
 def main():
+    """
+    Creates the required directories in the project.
+    """
     config = ConfigReader.read()
     os.makedirs('outputs/color', exist_ok=True)
     os.makedirs('outputs/gray', exist_ok=True)
