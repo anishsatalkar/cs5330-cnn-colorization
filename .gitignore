@@ -85,3 +85,5 @@ fabric.properties
 # tar files
 *.tar
 config.json
+
+.DS_Store
