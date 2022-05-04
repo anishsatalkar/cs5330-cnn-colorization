@@ -18,7 +18,7 @@ def main():
     use_gpu = torch.cuda.is_available()
     config = ConfigReader.read()
 
-    model = GrayscaleToColorModel()
+    model = GrayscaleToColorModel(kernel_size=3)
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 

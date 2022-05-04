@@ -8,7 +8,7 @@ from helper import State, ConvertToRGB
 
 
 class GrayscaleToColorModel(nn.Module):
-    def __init__(self, size=128):
+    def __init__(self, size=128, kernel_size=3):
         super(GrayscaleToColorModel, self).__init__()
 
         # TODO: add num_classes argument
@@ -26,26 +26,26 @@ class GrayscaleToColorModel(nn.Module):
         # Upsample the output from the last layer of ResNet
         self.upsample_layers = nn.Sequential(
             # TODO: Try padding 1.
-            nn.Conv2d(size, 128, kernel_size=3, padding=1),
+            nn.Conv2d(size, 128, kernel_size=kernel_size, padding=1),
             # TODO
             nn.BatchNorm2d(128),
             nn.ReLU(),
             # TODO Try varying the scale_factor
             nn.Upsample(scale_factor=2),
-            nn.Conv2d(128, 64, kernel_size=3, padding=1),
+            nn.Conv2d(128, 64, kernel_size=kernel_size, padding=1),
             nn.BatchNorm2d(64),
 
             nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1),
+            nn.Conv2d(64, 64, kernel_size=kernel_size, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.Upsample(scale_factor=2),
 
-            nn.Conv2d(64, 32, kernel_size=3, padding=1),
+            nn.Conv2d(64, 32, kernel_size=kernel_size, padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU(),
 
-            nn.Conv2d(32, 2, kernel_size=3, padding=1),
+            nn.Conv2d(32, 2, kernel_size=kernel_size, padding=1),
             nn.Upsample(scale_factor=2)
         )
 
@@ -80,7 +80,7 @@ class Trainer(object):
             loss = criterion(predicted_ab_img, ab_img)
             losses.update(loss.item(), gray.size(0))
 
-            if epoch=="":
+            if epoch == "":
                 for jdx in range(min(len(predicted_ab_img), 10)):
                     print(f"Saving {idx} image")
                     save_name = f"img-{idx * validate_loader.batch_size + jdx}-epoch-{epoch}.jpg"
