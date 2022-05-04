@@ -1,6 +1,5 @@
 import json
 
-
 class ConfigReader(object):
     @staticmethod
     def read():

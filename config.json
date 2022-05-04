@@ -1,4 +1,11 @@
 {
   "train_val_split_dir": "D:\\Documents\\Northeastern\\Courses\\PRCV-5330\\Projects\\final_project\\cs5330-cnn-colorization\\images",
-  "training_data_directory": "D:\\Documents\\Northeastern\\Courses\\PRCV-5330\\Projects\\final_project\\MIT_images"
+  "training_data_directory": "D:\\Documents\\Northeastern\\Courses\\PRCV-5330\\Projects\\final_project\\MIT_images",
+  "test_data_directory":
+      "/Users/ankithaudupa/Desktop/Colorization/CV_photos",
+  "test_video_directory":
+      "/Users/ankithaudupa/Desktop/Colorization/CV_Video/video_1.MP4",
+  "video_frames_directory":
+      "/Users/ankithaudupa/Desktop/Colorization/CV_Video/video_images"
+
 }

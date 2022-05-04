@@ -1,8 +1,8 @@
+import os
 import sys
-
 import cv2
-
-import read_image
+from config_reader import ConfigReader
+from test_data import Test_Data
 
 image_size = 256
 
@@ -10,47 +10,66 @@ image_size = 256
 def main(argv):
     if len(argv) != 2:
         print("Usage: python read_video.py <video_file>")
+
     # read the video
-    cap = cv2.VideoCapture(argv[1])
-    # get the frame size
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    writer = cv2.VideoWriter(
-        "./videos/output.avi", cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (image_size, image_size))
-    # display the video
+    config = ConfigReader.read()
+    cap = cv2.VideoCapture(config["test_video_directory"])
+
+    #Write each video frame
+    counter = 0
     while True:
+        counter += 1
         success, frame = cap.read()
         if success:
-            # add a border to the frame
-            frame = cv2.copyMakeBorder(
-                frame, int((width-height)/2), int((width-height)/2), 0, 0, cv2.BORDER_CONSTANT, None, value=0)
-            # resize to 128x128
             frame = cv2.resize(frame, (image_size, image_size))
-            # convert to LAB
-            lab_image = read_image.convertToLAB(frame)
-            L, A, B = cv2.split(lab_image)
-            # display the LAB frames
-            cv2.imshow('Original', frame)
-            cv2.imshow('L', L)
-            cv2.imshow('a', A)
-            cv2.imshow('b', B)
-
-            # combine the LAB images
-            merged_image = read_image.combine(L, A, B)
-            # save the frames
-            writer.write(merged_image)
-
-            # TODO: remove black stripes before displaying and saving video
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            cv2.imwrite(config["video_frames_directory"]+f"/root/{counter}.jpg",frame)
         else:
             break
 
-    cap.release()
-    writer.release()
+    #Evaluate each frame using the model-> convert each frame from grayscale to color
+    ckpt_path = "/Users/ankithaudupa/Desktop/Final Project CVPR/cs5330-cnn-colorization-master/checkpoints/model-epoch-95-losses-0.0024831692744046448"
+    path_to_img = config["video_frames_directory"]
+    path_to_save = {'grayscale': 'outputs/video_gray/', 'color': 'outputs/video_color/'}
+    Test_Data.test_image(ckpt_path, path_to_img, path_to_save, True)
     cv2.destroyAllWindows()
+
+
+
+
+def make_video():
+    video_image_folder="outputs/video_color"
+    save_video_name="output.avi"
+    counter=-1
+    images=[]
+
+    #glob images
+    for image in os.listdir(video_image_folder):
+        counter += 1
+        if(image.endswith(".jpg") or image.endswith(".jpeg") or image.endswith(".png")):
+            images.append(image)
+
+    #Sort the images in order of frames
+    def split_name(img_name):
+        return int(img_name.split("-")[1])
+    images.sort(key=split_name)
+
+    #read each frame
+    frame=cv2.imread(os.path.join(video_image_folder,images[0]))
+
+    #setting the width and height of the frame
+    h,w,l=frame.shape
+
+    #create an instance of VideoWriter with 30 fps
+    vid=cv2.VideoWriter(save_video_name,cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),30,(w,h))
+
+    #Generating the video from each frame
+    for img in images:
+        vid.write(cv2.imread(os.path.join(video_image_folder,img)))
+
+    cv2.destroyAllWindows()
+    vid.release()
 
 
 if __name__ == "__main__":
     main(sys.argv)
+    make_video()
