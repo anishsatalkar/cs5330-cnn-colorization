@@ -8,7 +8,7 @@ from helper import State, ConvertToRGB
 
 
 class GrayscaleToColorModel(nn.Module):
-    def __init__(self, size=128, kernel_size=3):
+    def __init__(self, size=128, kernel_size=3, activation=nn.ReLU()):
         super(GrayscaleToColorModel, self).__init__()
 
         # TODO: add num_classes argument
@@ -23,24 +23,24 @@ class GrayscaleToColorModel(nn.Module):
         self.resnet_layers = nn.Sequential(*list(resnet.children())[0:6])
 
         # Upsample the output from the last layer of ResNet
-        padding = 2
+        padding = 3
         self.upsample_layers = nn.Sequential(
             nn.Conv2d(size, 128, kernel_size=kernel_size, padding=padding),
             nn.BatchNorm2d(128),
-            nn.ReLU(),
+            activation,
             nn.Upsample(scale_factor=2),
             nn.Conv2d(128, 64, kernel_size=kernel_size, padding=padding),
             nn.BatchNorm2d(64),
 
-            nn.ReLU(),
+            activation,
             nn.Conv2d(64, 64, kernel_size=kernel_size, padding=padding),
             nn.BatchNorm2d(64),
-            nn.ReLU(),
+            activation,
             nn.Upsample(scale_factor=2),
 
             nn.Conv2d(64, 32, kernel_size=kernel_size, padding=padding),
             nn.BatchNorm2d(32),
-            nn.ReLU(),
+            activation,
 
             nn.Conv2d(32, 2, kernel_size=kernel_size, padding=padding),
             nn.Upsample(scale_factor=2)

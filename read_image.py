@@ -72,9 +72,8 @@ def main(argv):
     # read the image
     image = Image.open(image_file)
 
-    # random resize crop and save image
-    randresizecrop = RandomResizedCrop(128)
-    image = randresizecrop(image)
+    # resize to 256x256 and then center crop to 224x224
+    image = cv2.resize(image, (256, 256))[16:240, 16:240]
     lab_image = convertToLAB(image)
     merged_image = combine(
         lab_image[:, :, 0], lab_image[:, :, 1], lab_image[:, :, 2])
