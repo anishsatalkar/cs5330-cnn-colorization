@@ -86,3 +86,4 @@ fabric.properties
 *.tar
 config.json
 config.json
+*.json

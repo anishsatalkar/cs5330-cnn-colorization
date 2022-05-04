@@ -22,30 +22,27 @@ class GrayscaleToColorModel(nn.Module):
         # Use only the first 6 layers of ResNet18
         self.resnet_layers = nn.Sequential(*list(resnet.children())[0:6])
 
-        # TODO: Why to upsample?
         # Upsample the output from the last layer of ResNet
+        padding = 2
         self.upsample_layers = nn.Sequential(
-            # TODO: Try padding 1.
-            nn.Conv2d(size, 128, kernel_size=kernel_size, padding=1),
-            # TODO
+            nn.Conv2d(size, 128, kernel_size=kernel_size, padding=padding),
             nn.BatchNorm2d(128),
             nn.ReLU(),
-            # TODO Try varying the scale_factor
             nn.Upsample(scale_factor=2),
-            nn.Conv2d(128, 64, kernel_size=kernel_size, padding=1),
+            nn.Conv2d(128, 64, kernel_size=kernel_size, padding=padding),
             nn.BatchNorm2d(64),
 
             nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=kernel_size, padding=1),
+            nn.Conv2d(64, 64, kernel_size=kernel_size, padding=padding),
             nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.Upsample(scale_factor=2),
 
-            nn.Conv2d(64, 32, kernel_size=kernel_size, padding=1),
+            nn.Conv2d(64, 32, kernel_size=kernel_size, padding=padding),
             nn.BatchNorm2d(32),
             nn.ReLU(),
 
-            nn.Conv2d(32, 2, kernel_size=kernel_size, padding=1),
+            nn.Conv2d(32, 2, kernel_size=kernel_size, padding=padding),
             nn.Upsample(scale_factor=2)
         )
 
