@@ -50,22 +50,22 @@ def main():
     path_to_save = {'grayscale': 'outputs/gray/',
                     'color': 'outputs/color/'}
     lr = 0.01
-    for lr_count in range(3):
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-        lr += 0.05
-        for epoch in range(epochs):
-            start = time.time()
-            Trainer.train_model(train_loader, model, criterion, optimizer, epoch)
-            end = time.time()
-            print(f'Epoch {epoch + 1} took {end - start} seconds')
-            with torch.no_grad():
-                losses = Trainer.validate_model(
-                    validation_loader, model, criterion, save_images, path_to_save, epoch)
+    # for lr_count in range(3):
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    # lr += 0.05
+    for epoch in range(epochs):
+        start = time.time()
+        Trainer.train_model(train_loader, model, criterion, optimizer, epoch)
+        end = time.time()
+        print(f'Epoch {epoch + 1} took {end - start} seconds')
+        with torch.no_grad():
+            losses = Trainer.validate_model(
+                validation_loader, model, criterion, save_images, path_to_save, epoch)
 
-            if losses < max_losses:
-                max_losses = losses
-                torch.save(model.state_dict(),
-                           f'ckpt/model-epoch-{epoch + 1}-losses-{losses}')
+        if losses < max_losses:
+            max_losses = losses
+            torch.save(model.state_dict(),
+                       f'ckpt/model-epoch-{epoch + 1}-losses-{losses}')
 
     # image = Image.open(image_file)
     #

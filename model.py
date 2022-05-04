@@ -54,7 +54,7 @@ class GrayscaleToColorModel(nn.Module):
 
 class Trainer(object):
     @staticmethod
-    def validate(validate_loader, model, criterion, save_imgs, path_to_save, epoch):
+    def validate_model(validate_loader, model, criterion, save_imgs, path_to_save, epoch):
         model.eval()
 
         batch_time, data_time, losses = State(), State(), State()
@@ -67,7 +67,7 @@ class Trainer(object):
             use_gpu = True
 
         for idx, (gray, ab_img, target) in enumerate(validate_loader):
-            data_time.update(time.time() - end_time)
+            data_time.update_state(time.time() - end_time)
 
             if use_gpu:
                 gray, ab_img, target = gray.cuda(), ab_img.cuda(), target.cuda()
@@ -75,7 +75,7 @@ class Trainer(object):
             print(f"Predicting {idx} image")
             predicted_ab_img = model(gray)
             loss = criterion(predicted_ab_img, ab_img)
-            losses.update(loss.item(), gray.size(0))
+            losses.update_state(loss.item(), gray.size(0))
 
             if epoch == "":
                 for jdx in range(min(len(predicted_ab_img), 10)):
@@ -93,19 +93,19 @@ class Trainer(object):
                         ConvertToRGB.convert_to_rgb(gray[jdx].cpu(), ab_img=predicted_ab_img[jdx].detach().cpu(),
                                                     path_to_save=path_to_save, save_name=save_name)
 
-            batch_time.update(time.time() - end_time)
+            batch_time.update_state(time.time() - end_time)
             end_time = time.time()
 
             if idx % 50 == 0:
                 print(f'Validation: [{idx}/{len(validate_loader)}]\t'
-                      f'Time {batch_time.val:.3f} ({batch_time.average:.3f})\t'
-                      f'Loss {losses.val:.4f} ({losses.average:.4f})\t')
+                      f'Time {batch_time.value:.3f} ({batch_time.average:.3f})\t'
+                      f'Loss {losses.value:.4f} ({losses.average:.4f})\t')
 
         print("Done with validation.")
         return losses.average
 
     @staticmethod
-    def train(train_loader, model, criterion, optimizer, epoch):
+    def train_model(train_loader, model, criterion, optimizer, epoch):
         print(f"Training epoch {epoch}")
 
         model.train()
@@ -119,26 +119,26 @@ class Trainer(object):
             use_gpu = True
 
         for idx, (gray, ab_img, target) in enumerate(train_loader):
-            data_time.update(time.time(), end_time)
+            data_time.update_state(time.time(), end_time)
 
             if use_gpu:
                 gray, ab_img, target = gray.cuda(), ab_img.cuda(), target.cuda()
 
             predicted_ab_img = model(gray)
             loss = criterion(predicted_ab_img, ab_img)
-            losses.update(loss.item(), gray.size(0))
+            losses.update_state(loss.item(), gray.size(0))
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
-            batch_time.update(time.time(), end_time)
+            batch_time.update_state(time.time(), end_time)
             end_time = time.time()
 
             if idx % 50 == 0:
                 print(f'Epoch: [{epoch}][{idx}/{len(train_loader)}]\t'
-                      f'Time {batch_time.val:.3f} ({batch_time.average:.3f})\t'
-                      f'Data {data_time.val:.3f} ({data_time.average:.3f})\t'
-                      f'Loss {losses.val:.4f} ({losses.average:.4f})\t')
+                      f'Time {batch_time.value:.3f} ({batch_time.average:.3f})\t'
+                      f'Data {data_time.value:.3f} ({data_time.average:.3f})\t'
+                      f'Loss {losses.value:.4f} ({losses.average:.4f})\t')
 
         print(f'Trained epoch {epoch}')
