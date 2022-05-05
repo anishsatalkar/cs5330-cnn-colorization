@@ -14,7 +14,8 @@ We aim to achieve image colorization from grayscale images and videos by assigni
 
 ## URL for Presentation
 
-https://docs.google.com/document/d/1BHrWyhu5WzDsMqcfjKUWHFGZw2J4Nyo4JdAC9cnVLFU/edit?usp=sharing
+https://drive.google.com/drive/folders/1mQm4zABYc5G7U0ERx3DkYvK3NuDvfNfZ?usp=sharing
 
 ## URL for demo
 
+https://drive.google.com/drive/folders/1mQm4zABYc5G7U0ERx3DkYvK3NuDvfNfZ?usp=sharing
