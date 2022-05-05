@@ -23,7 +23,7 @@ class GrayscaleToColorModel(nn.Module):
         self.resnet_layers = nn.Sequential(*list(resnet.children())[0:6])
 
         # Upsample the output from the last layer of ResNet
-        padding = 3
+        padding = 1
         self.upsample_layers = nn.Sequential(
             nn.Conv2d(size, 128, kernel_size=kernel_size, padding=padding),
             nn.BatchNorm2d(128),

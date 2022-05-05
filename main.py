@@ -46,7 +46,7 @@ def main():
 
     save_images = True
     max_losses = 1e10
-    epochs = 5
+    epochs = 10
     path_to_save = {'grayscale': 'outputs/gray/',
                     'color': 'outputs/color/'}
     lr = 0.01
