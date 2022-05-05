@@ -1,8 +1,8 @@
-# Imports.
+import time
+
 import torch
 from torch import nn
 from torchvision import transforms
-import time
 
 from config_reader import ConfigReader
 from grayscalefolder import GrayscaleImageFolder
@@ -22,7 +22,7 @@ def main():
     use_gpu = torch.cuda.is_available()
     config = ConfigReader.read()
 
-    model = GrayscaleToColorModel(kernel_size=3, activation=nn.Sigmoid())
+    model = GrayscaleToColorModel(kernel_size=3, activation=nn.ReLU())
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
@@ -46,7 +46,7 @@ def main():
 
     save_images = True
     max_losses = 1e10
-    epochs = 10
+    epochs = 100
     path_to_save = {'grayscale': 'outputs/gray/',
                     'color': 'outputs/color/'}
     lr = 0.01
