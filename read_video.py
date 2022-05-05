@@ -1,6 +1,8 @@
 import os
 import sys
+
 import cv2
+
 from config_reader import ConfigReader
 from test_data import Test_Data
 
@@ -26,14 +28,16 @@ def main(argv):
         success, frame = cap.read()
         if success:
             frame = cv2.resize(frame, (image_size, image_size))
-            cv2.imwrite(config["video_frames_directory"] + f"/root/{counter}.jpg", frame)
+            cv2.imwrite(config["video_frames_directory"] +
+                        f"/root/{counter}.jpg", frame)
         else:
             break
 
     # Evaluate each frame using the model-> convert each frame from grayscale to color
     ckpt_path = "/Users/ankithaudupa/Desktop/Final Project CVPR/cs5330-cnn-colorization-master/checkpoints/model-epoch-95-losses-0.0024831692744046448"
     path_to_img = config["video_frames_directory"]
-    path_to_save = {'grayscale': 'outputs/video_gray/', 'color': 'outputs/video_color/'}
+    path_to_save = {'grayscale': 'outputs/video_gray/',
+                    'color': 'outputs/video_color/'}
     Test_Data.test_image(ckpt_path, path_to_img, path_to_save, True)
     cv2.destroyAllWindows()
 
@@ -66,7 +70,8 @@ def make_video():
     h, w, l = frame.shape
 
     # create an instance of VideoWriter with 30 fps
-    vid = cv2.VideoWriter(save_video_name, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (w, h))
+    vid = cv2.VideoWriter(save_video_name, cv2.VideoWriter_fourcc(
+        'M', 'J', 'P', 'G'), 30, (w, h))
 
     # Generating the video from each frame
     for img in images:

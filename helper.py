@@ -43,5 +43,7 @@ class ConvertToRGB(object):
         gray_image = gray_image.squeeze().numpy()
 
         if path_to_save is not None and save_name is not None:
-            plt.imsave(arr=gray_image, fname=f"{path_to_save['grayscale']}{save_name}", cmap='gray')
-            plt.imsave(arr=color_image, fname=f"{path_to_save['color']}{save_name}")
+            plt.imsave(
+                arr=gray_image, fname=f"{path_to_save['grayscale']}{save_name}", cmap='gray')
+            plt.imsave(arr=color_image,
+                       fname=f"{path_to_save['color']}{save_name}")

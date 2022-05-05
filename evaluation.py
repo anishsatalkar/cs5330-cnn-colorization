@@ -1,12 +1,19 @@
-import numpy as np
-import cv2
 import os
 import sys
+
+import cv2
+import numpy as np
 from matplotlib import pyplot as plt
 from numpy.linalg import norm
 
 
 def compare_images(original, predicted):
+    """Compare the images and return the L2 norm and the saturation difference
+
+    Args:
+        original (image): the original image
+        predicted (image): the predicted image
+    """
     # function to calculate the distance between two images
     # convert the images to Lab color space
     original_lab = cv2.cvtColor(original, cv2.COLOR_BGR2LAB)
@@ -25,7 +32,14 @@ def compare_images(original, predicted):
 
 
 def read_images(path):
-    # read all images in the folder
+    """ Read all images in the folder
+
+    Args:
+        path (str): the path to the folder
+
+    Returns:
+        list: a list of images
+    """
     images = []
     for filename in os.listdir(path):
         if filename.endswith(".jpg"):
@@ -37,6 +51,12 @@ def read_images(path):
 
 
 def compare_folders(original_path, predicted_path):
+    """ Compare all the images in the folders
+
+    Args:
+        original_path (str): the path to the original images
+        predicted_path (str): the path to the predicted images
+    """
     # read the images in the folders
     original_images = read_images(original_path)
     predicted_images = read_images(predicted_path)
@@ -53,6 +73,12 @@ def compare_folders(original_path, predicted_path):
 
 
 def plot_images(original_path, predicted_path):
+    """ Plot the images in the folders
+
+    Args:
+        original_path (str): the path to the original images
+        predicted_path (str): the path to the predicted images
+    """
     # read the images in the folders
     original_images = read_images(original_path)
     # convert to RGB
@@ -77,6 +103,7 @@ def plot_images(original_path, predicted_path):
 
 
 def main(argv):
+    """ Evaluate the performance of the model"""
     # validate the arguments
     if len(argv) != 3:
         print("Usage: python3 evaluation.py <original_path> <predicted_path>")

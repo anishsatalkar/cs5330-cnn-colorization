@@ -4,7 +4,7 @@ import torch.cuda
 import torch.nn as nn
 from torchvision import models
 
-from helper import State, ConvertToRGB
+from helper import ConvertToRGB, State
 
 
 class GrayscaleToColorModel(nn.Module):
@@ -18,7 +18,6 @@ class GrayscaleToColorModel(nn.Module):
         resnet.conv1.weight = nn.Parameter(
             resnet.conv1.weight.sum(dim=1).unsqueeze(1))
 
-        # TODO: Check resnet.children(), does increasing the layers improve the accuracy?
         # Use only the first 6 layers of ResNet18
         self.resnet_layers = nn.Sequential(*list(resnet.children())[0:6])
 
