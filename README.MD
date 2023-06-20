@@ -18,3 +18,7 @@ https://drive.google.com/drive/folders/1mQm4zABYc5G7U0ERx3DkYvK3NuDvfNfZ?usp=sha
 ## URL for demo
 
 https://drive.google.com/file/d/1hOWYKBdbEPFCUJtn2MhvtsWzravPmLeD/view?usp=sharing
+
+## URL for Paper
+
+https://www.researchgate.net/publication/367510104_Colorization_of_Grayscale_Images_Videos_using_CNN
